@@ -8,8 +8,8 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.use('/api/products', ProductRoutes)
-app.use("/api/orders", OrderRoutes)
+app.use("/api/products", ProductRoutes);
+app.use("/api/orders", OrderRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello mama kmn achos");

@@ -4,12 +4,10 @@ import config from "./app/config/index.ts";
 
 const port = config.port;
 async function main() {
-
-  await mongoose.connect(config.database_url as string)
+  await mongoose.connect(config.database_url as string);
   app.listen(port, () => {
-    console.log("Server is listening at port no ",port);
-
-  })
+    console.log("Server is listening at port no ", port);
+  });
 }
 
-main()
+main();

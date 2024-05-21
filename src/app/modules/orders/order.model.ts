@@ -1,69 +1,73 @@
-import { Model, Schema, model } from "mongoose";
+import { Schema, model } from "mongoose";
 import { TOrders } from "./order.interface";
 import { Product } from "../product/product.model";
-import { TProduct } from "../product/product.interface";
-import { log } from "console";
 
 const orderSchema = new Schema<TOrders>({
   email: {
     type: String,
-    required: [true, 'An email is needed for order']
+    required: [true, "An email is needed for order"],
   },
   productId: {
     type: String,
-    required: [true, 'Product id is needed']
+    required: [true, "Product id is needed"],
   },
   price: {
     type: Number,
-    required: [true, 'Price is needed']
+    required: [true, "Price is needed"],
   },
   quantity: {
     type: Number,
-    required: [true, 'quantity is needed']
-  }
-})
-
+    required: [true, "quantity is needed"],
+  },
+});
 
 // INFO: mongoose pre hooks for some extra queyr
 
-orderSchema.pre("save", async function(next) {
+orderSchema.pre("save", async function (next) {
   const check = await Product.findById(this.productId);
 
   if (check === null) {
     const message = JSON.stringify("There is no such product");
-    throw new Error(message)
+    throw new Error(message);
   }
-
 
   const orderQuantity = this.quantity;
   const productid = this.productId;
-  const productQuantity = await Product.findOne({ _id: productid }) // INFO: calculate the product quantity
+  const productQuantity = await Product.findOne({ _id: productid }); // INFO: calculate the product quantity
 
-  const checkProductQuantity = (productQuantity?.inventory.quantity as number) - orderQuantity;
+  const checkProductQuantity =
+    (productQuantity?.inventory.quantity as number) - orderQuantity;
 
   if (!((productQuantity?.inventory.quantity as number) >= orderQuantity)) {
-    const message = JSON.stringify('Product quantity is lesser than you have ordered')
+    const message = JSON.stringify(
+      "Product quantity is lesser than you have ordered",
+    );
     throw new Error(message);
   }
 
   if (checkProductQuantity > 0) {
-    const update = await Product.findOneAndUpdate({ _id: productid }, {
-      "inventory.quantity": checkProductQuantity
-    }, {
-      new: true
-    })
-  }
-  else {
-    const update = await Product.findOneAndUpdate({ _id: productid }, {
-      "inventory.quantity": checkProductQuantity,
-      "inventory.inStock": false
-    },
+    await Product.findOneAndUpdate(
+      { _id: productid },
       {
-        new: true
-      })
+        "inventory.quantity": checkProductQuantity,
+      },
+      {
+        new: true,
+      },
+    );
+  } else {
+    await Product.findOneAndUpdate(
+      { _id: productid },
+      {
+        "inventory.quantity": checkProductQuantity,
+        "inventory.inStock": false,
+      },
+      {
+        new: true,
+      },
+    );
   }
-  next()
-})
+  next();
+});
 
-
-export const Order = model<TOrders>('Order', orderSchema)
+export const Order = model<TOrders>("Order", orderSchema);
