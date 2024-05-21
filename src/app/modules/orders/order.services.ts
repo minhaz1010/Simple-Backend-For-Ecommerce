@@ -8,8 +8,11 @@ const createOrderInDatabase = async (ordersData: TOrders) => {
 };
 
 // NOTE: service function to get all order from database
-const getAllOrderFromDatabase = async () => {
-  const result = await Order.find();
+const getAllOrderFromDatabase = async (query: string) => {
+  // INFO: make the query more dynamic according to the logic
+  let resultQuery = query ? { email: query } : {};
+
+  const result = await Order.find(resultQuery);
   return result;
 };
 

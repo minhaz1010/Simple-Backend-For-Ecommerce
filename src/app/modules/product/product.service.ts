@@ -8,9 +8,10 @@ const createProductInDatabase = async (productData: TProduct) => {
 
 const getAllProductsFromDatabase = async (query: string) => {
   //  INFO:: filtering if any query is given or not and then search by indexes
-  const resultCriteria = query ? { $text: { $search: query } } : {};
 
-  const result = await Product.find(resultCriteria);
+  const regexCriteria = query ? { name: { $regex: query, $options: "i" } } : {};
+  const result = await Product.find(regexCriteria);
+
   return result;
 };
 
