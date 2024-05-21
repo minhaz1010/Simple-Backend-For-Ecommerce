@@ -18,8 +18,8 @@ app.get("/", (req, res) => {
 app.all("*", (req: Request, res: Response) => {
   res.status(400).json({
     success: false,
-    message: "Route not found"
-  })
-})
+    message: JSON.stringify("Route Not Found"),
+  });
+});
 
 export default app;

@@ -3,12 +3,12 @@ import { ProductServices } from "./product.service";
 import { productValidationSchema } from "./product.validation";
 import { TProduct } from "./product.interface";
 
-// INFO: product controller to create product 
+// HACK: product controller to create product
 const createProduct = async (req: Request, res: Response) => {
   try {
     const data = req.body.product;
     const parsedData = productValidationSchema.safeParse(data);
-    // INFO: if zod validation safeParse gives me false then i will throw an error 
+    // INFO: if zod validation safeParse gives me false then i will throw an error
     if (!parsedData.success) {
       const message = JSON.stringify(parsedData.error);
       throw new Error(message);
@@ -25,12 +25,21 @@ const createProduct = async (req: Request, res: Response) => {
     res.status(400).json({
       success: false,
       message: "Something Went Wrong To Create Product",
-      error: error instanceof Error ? JSON.parse(error.message) : error,
+      error:
+        error instanceof Error
+          ? (() => {
+              try {
+                return JSON.parse(error.message);
+              } catch (e) {
+                return { message: error.message };
+              }
+            })()
+          : error,
     });
   }
 };
 
-// INFO: get all products controller 
+// HACK: get all products controller
 
 const getAllProducts = async (req: Request, res: Response) => {
   try {
@@ -45,15 +54,13 @@ const getAllProducts = async (req: Request, res: Response) => {
       }
     }
 
-
-
     const product = await ProductServices.getAllProductsFromDatabase(query);
-    // NOTE: checking whether product is in database or not 
+    // NOTE: checking whether product is in database or not
     if (product.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "No Product Found"
-      })
+        message: "No Product Found",
+      });
     }
 
     res.status(200).json({
@@ -61,8 +68,7 @@ const getAllProducts = async (req: Request, res: Response) => {
       message: "Products Fetched Successfully!",
       data: product,
     });
-  }
-  catch (error) {
+  } catch (error) {
     res.status(400).json({
       success: false,
       message: "Something Went Wrong To Fetch The Data",
@@ -70,6 +76,8 @@ const getAllProducts = async (req: Request, res: Response) => {
     });
   }
 };
+
+// HACK: product controller to get a single data
 const getSingleProduct = async (req: Request, res: Response) => {
   try {
     const { productId } = req.params;
@@ -79,8 +87,8 @@ const getSingleProduct = async (req: Request, res: Response) => {
     if (!product) {
       return res.status(400).json({
         success: false,
-        message: "No Product Found"
-      })
+        message: "No Product Found",
+      });
     }
     res.status(200).json({
       success: true,
@@ -95,6 +103,7 @@ const getSingleProduct = async (req: Request, res: Response) => {
     });
   }
 };
+// HACK: product controller to update the Data
 
 const updateProduct = async (req: Request, res: Response) => {
   try {
@@ -105,17 +114,26 @@ const updateProduct = async (req: Request, res: Response) => {
     if (Object.keys(data).length === 0) {
       return res.status(400).json({
         success: false,
-        message: "There is nothing to update as you did not give any data"
-      })
+        message: "There is nothing to update as you did not give any data",
+      });
     }
 
-    // INFO: if any data is given then checking validation by using zod and used partial 
+    // INFO: if any data is given then checking validation by using zod and used partial
     const parsedData = productValidationSchema.partial().safeParse(data);
-    // INFO: if zod validation parsedData success is false then it will throw error 
+
+    // INFO: if zod validation parsedData.success is false then it will throw error
     if (!parsedData.success) {
       const message = JSON.stringify(parsedData.error);
       throw new Error(message);
     }
+    // INFO: suppose if anyone given random field data which is not in the model then i will show this error
+    if (Object.keys(parsedData.data).length === 0) {
+      const message = JSON.stringify(
+        "Please provide the data according to the field",
+      );
+      throw new Error(message);
+    }
+
     const product = await ProductServices.updateAProductInDatabase(
       productId,
       parsedData.data as TProduct,
@@ -129,31 +147,41 @@ const updateProduct = async (req: Request, res: Response) => {
     res.status(400).json({
       success: false,
       message: "Something went wrong to update the data",
-      error: error instanceof Error ? JSON.parse(error.message) : error,
+      error:
+        error instanceof Error
+          ? (() => {
+              try {
+                return JSON.parse(error.message);
+              } catch (e) {
+                return { message: error.message };
+              }
+            })()
+          : error,
     });
   }
 };
-
+// HACK: product controller to delete a data
 const deleteAProduct = async (req: Request, res: Response) => {
   try {
-    const product = await ProductServices.deleteAProductFromDatabase(req.params.productId);
-    console.log(product);
+    const product = await ProductServices.deleteAProductFromDatabase(
+      req.params.productId,
+    );
 
     if (!product) {
       return res.status(400).json({
         success: false,
-        message: "Sorry There Is No Such Product To Delete"
-      })
+        message: "Sorry There Is No Such Product To Delete",
+      });
     }
     res.status(200).json({
       success: true,
-      message: "Product deleted successfully!",
+      message: "Product Deleted Successfully!",
       data: null,
     });
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: "Something went wrong to delete the data",
+      message: "Something Went Wrong To Delete The Data",
       error,
     });
   }

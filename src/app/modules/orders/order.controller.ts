@@ -7,7 +7,7 @@ import { TOrders } from "./order.interface";
 const createOrder = async (req: Request, res: Response) => {
   try {
     const parsedData = orderValidationSchema.safeParse(req.body.order);
-    // INFO: if zod validation safeParse gives me false then it will throw an error 
+    // INFO: if zod validation safeParse gives me false then it will throw an error
 
     if (!parsedData.success) {
       const message = JSON.stringify(parsedData.error);
@@ -25,8 +25,16 @@ const createOrder = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: "something went wrong",
-      error: error instanceof Error ? JSON.parse(error.message) : error,
+      message:
+        error instanceof Error
+          ? (() => {
+              try {
+                return JSON.parse(error.message);
+              } catch (e) {
+                return { message: error.message };
+              }
+            })()
+          : error,
     });
   }
 };
@@ -34,7 +42,6 @@ const createOrder = async (req: Request, res: Response) => {
 // NOTE: controller function to show all order
 const getAllOrder = async (req: Request, res: Response) => {
   try {
-
     // INFO: if query is given then query will be taken and not given then empty string will be the query
     let query: string = "";
     const { email } = req.query;
@@ -52,8 +59,8 @@ const getAllOrder = async (req: Request, res: Response) => {
     if (order.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "Order not found"
-      })
+        message: "Order not found",
+      });
     }
     res.status(200).json({
       success: true,
@@ -68,9 +75,6 @@ const getAllOrder = async (req: Request, res: Response) => {
     });
   }
 };
-
-
-
 
 export const OrderCollection = {
   createOrder,
