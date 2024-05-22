@@ -5,7 +5,7 @@
 
 >> `mongodb+srv://<username>:<password>@cluster1.r104mlb.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1`
 
->> and then go to the `Database Access ` in left side and then create a new database user please save the `username` and `password` and then paste it to the mongodb connection string `<username>` and `<password>` section   
+>> and then go to the `Database Access ` in left side and then create a new database user please save the `username` and `password` and then paste it to the mongodb connection string `<username>` and `<password>` section  
 >> and remember one thing Dont forget to add `Built-in-role'` to `Read and write to any database`
 
 
