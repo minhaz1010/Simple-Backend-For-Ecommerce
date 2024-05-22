@@ -54,5 +54,4 @@ const productSchema = new mongoose_1.Schema({
         required: [true, "Inventory details must be provided"],
     },
 });
-productSchema.index({ name: "text" });
 exports.Product = (0, mongoose_1.model)("Product", productSchema);

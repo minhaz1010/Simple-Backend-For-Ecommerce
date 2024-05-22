@@ -12,10 +12,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductController = void 0;
 const product_service_1 = require("./product.service");
 const product_validation_1 = require("./product.validation");
+// HACK: product controller to create product
 const createProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const data = req.body.product;
         const parsedData = product_validation_1.productValidationSchema.safeParse(data);
+        // INFO: if zod validation safeParse gives me false then i will throw an error
         if (!parsedData.success) {
             const message = JSON.stringify(parsedData.error);
             throw new Error(message);
@@ -23,99 +25,156 @@ const createProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const product = yield product_service_1.ProductServices.createProductInDatabase(parsedData.data);
         res.status(201).json({
             success: true,
-            message: "Product created successfully!",
+            message: "Product Created Successfully!",
             data: product,
         });
     }
     catch (error) {
         res.status(400).json({
             success: false,
-            message: "Something went wrong",
-            error: error instanceof Error ? JSON.parse(error.message) : error,
+            message: "Something Went Wrong To Create Product",
+            error: error instanceof Error
+                ? (() => {
+                    try {
+                        return JSON.parse(error.message);
+                    }
+                    catch (e) {
+                        return { message: error.message };
+                    }
+                })()
+                : error,
         });
     }
 });
+// HACK: get all products controller
 const getAllProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { searchTerm } = req.query;
         let query = "";
-        if (typeof searchTerm === "string") {
-            query = searchTerm;
+        // INFO: if query is given then the query will be taken and if not then query = ''
+        if (searchTerm !== undefined) {
+            if (typeof searchTerm === "string") {
+                query = searchTerm;
+            }
+            else if (Array.isArray(searchTerm)) {
+                query = searchTerm.join(" ");
+            }
         }
-        else if (Array.isArray(searchTerm)) {
-            query = searchTerm.join(" "); // Or handle as needed
-        }
-        // console.log(query, 'controller');
         const product = yield product_service_1.ProductServices.getAllProductsFromDatabase(query);
+        // NOTE: checking whether product is in database or not
+        if (product.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "No Product Found",
+            });
+        }
         res.status(200).json({
             success: true,
-            message: "Products fetched successfully!",
+            message: "Products Fetched Successfully!",
             data: product,
         });
     }
     catch (error) {
         res.status(400).json({
             success: false,
-            message: "Something went wrong to fetch the data",
+            message: "Something Went Wrong To Fetch The Data",
             error,
         });
     }
 });
+// HACK: product controller to get a single data
 const getSingleProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { productId } = req.params;
         const product = yield product_service_1.ProductServices.getSingleProductFromDatabase(productId);
+        if (!product) {
+            return res.status(400).json({
+                success: false,
+                message: "No Product Found",
+            });
+        }
         res.status(200).json({
             success: true,
-            message: "Product fetched successfully!",
+            message: "Product Fetched Successfully!",
             data: product,
         });
     }
     catch (error) {
         res.status(400).json({
             success: false,
-            message: "Something went wrong to fetch the data",
+            message: "Something Went Wrong To Fetch The Data",
             error,
         });
     }
 });
+// HACK: product controller to update the Data
 const updateProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { productId } = req.params;
         const data = req.body;
+        // NOTE: checking if any data is given or not .. if not then send a Response with that there is nothing to update
+        if (Object.keys(data).length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "There is nothing to update as you did not give any data",
+            });
+        }
+        // INFO: if any data is given then checking validation by using zod and used partial
         const parsedData = product_validation_1.productValidationSchema.partial().safeParse(data);
+        // INFO: if zod validation parsedData.success is false then it will throw error
         if (!parsedData.success) {
             const message = JSON.stringify(parsedData.error);
+            throw new Error(message);
+        }
+        // INFO: suppose if anyone given random field data which is not in the model then i will show this error
+        if (Object.keys(parsedData.data).length === 0) {
+            const message = JSON.stringify("Please provide the data according to the field");
             throw new Error(message);
         }
         const product = yield product_service_1.ProductServices.updateAProductInDatabase(productId, parsedData.data);
         res.status(200).json({
             success: true,
-            message: "Product updated successfully!",
+            message: "Product Updated Successfully!",
             data: product,
         });
     }
     catch (error) {
         res.status(400).json({
             success: false,
-            message: "Something went wrong to fetch the data",
-            error: error instanceof Error ? JSON.parse(error.message) : error,
+            message: "Something went wrong to update the data",
+            error: error instanceof Error
+                ? (() => {
+                    try {
+                        return JSON.parse(error.message);
+                    }
+                    catch (e) {
+                        return { message: error.message };
+                    }
+                })()
+                : error,
         });
     }
 });
+// HACK: product controller to delete a data
 const deleteAProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield product_service_1.ProductServices.deleteAProductFromDatabase(req.params.productId);
+        const product = yield product_service_1.ProductServices.deleteAProductFromDatabase(req.params.productId);
+        if (!product) {
+            return res.status(400).json({
+                success: false,
+                message: "Sorry There Is No Such Product To Delete",
+            });
+        }
         res.status(200).json({
             success: true,
-            message: "Product deleted successfully!",
+            message: "Product Deleted Successfully!",
             data: null,
         });
     }
     catch (error) {
         res.status(400).json({
             success: false,
-            message: "Something went wrong to fetch the data",
+            message: "Something Went Wrong To Delete The Data",
             error,
         });
     }

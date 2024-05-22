@@ -17,8 +17,10 @@ const createOrderInDatabase = (ordersData) => __awaiter(void 0, void 0, void 0, 
     return result;
 });
 // NOTE: service function to get all order from database
-const getAllOrderFromDatabase = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield order_model_1.Order.find();
+const getAllOrderFromDatabase = (query) => __awaiter(void 0, void 0, void 0, function* () {
+    // INFO: make the query more dynamic according to the logic
+    const resultQuery = query ? { email: query } : {};
+    const result = yield order_model_1.Order.find(resultQuery);
     return result;
 });
 exports.OrderServices = {

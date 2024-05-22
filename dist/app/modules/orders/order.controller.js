@@ -16,6 +16,7 @@ const order_services_1 = require("./order.services");
 const createOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const parsedData = order_validation_1.orderValidationSchema.safeParse(req.body.order);
+        // INFO: if zod validation safeParse gives me false then it will throw an error
         if (!parsedData.success) {
             const message = JSON.stringify(parsedData.error);
             throw new Error(message);
@@ -30,15 +31,42 @@ const createOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     catch (error) {
         res.status(400).json({
             success: false,
-            message: "something went wrong",
-            error: error instanceof Error ? JSON.parse(error.message) : error,
+            message: error instanceof Error
+                ? (() => {
+                    try {
+                        return JSON.parse(error.message);
+                    }
+                    catch (e) {
+                        return { message: error.message };
+                    }
+                })()
+                : error,
         });
     }
 });
 // NOTE: controller function to show all order
 const getAllOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const order = yield order_services_1.OrderServices.getAllOrderFromDatabase();
+        // INFO: if query is given then query will be taken and not given then empty string will be the query
+        let query = "";
+        const { email } = req.query;
+        // INFO: checking whether email is undefined or not
+        if (email !== undefined) {
+            if (typeof email === "string") {
+                query = email;
+            }
+            else if (Array.isArray(email)) {
+                query = email.join(" ");
+            }
+        }
+        const order = yield order_services_1.OrderServices.getAllOrderFromDatabase(query);
+        // INFO: if there is no order then 'Orders not found' wii be shown
+        if (order.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Order not found",
+            });
+        }
         res.status(200).json({
             success: true,
             message: "Orders fetched successfully!",

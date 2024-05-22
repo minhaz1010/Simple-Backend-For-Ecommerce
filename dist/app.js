@@ -15,4 +15,10 @@ app.use("/api/orders", order_route_1.OrderRoutes);
 app.get("/", (req, res) => {
     res.send("Hello mama kmn achos");
 });
+app.all("*", (req, res) => {
+    res.status(400).json({
+        success: false,
+        message: JSON.stringify("Route Not Found"),
+    });
+});
 exports.default = app;
