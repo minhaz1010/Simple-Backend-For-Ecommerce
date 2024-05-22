@@ -5,14 +5,24 @@ import { OrderRoutes } from "./app/modules/orders/order.route";
 
 const app = express();
 
+const corsConfig = {
+  origin:"*",
+  credential:true,
+  methods:['GET','POST',"PUT","DELETE"]
+}
+
+
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsConfig));
 
 app.use("/api/products", ProductRoutes);
 app.use("/api/orders", OrderRoutes);
 
 app.get("/", (req, res) => {
-  res.send("Hello mama kmn achos");
+  res.status(200).json({
+    success:true,
+    message:"Hello from express world"
+  })
 });
 
 app.all("*", (req: Request, res: Response) => {
