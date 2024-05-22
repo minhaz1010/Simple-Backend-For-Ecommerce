@@ -121,6 +121,7 @@ const updateProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         }
         // INFO: if any data is given then checking validation by using zod and used partial
         const parsedData = product_validation_1.productValidationSchema.partial().safeParse(data);
+        console.log(parsedData);
         // INFO: if zod validation parsedData.success is false then it will throw error
         if (!parsedData.success) {
             const message = JSON.stringify(parsedData.error);
