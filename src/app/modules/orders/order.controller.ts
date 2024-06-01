@@ -6,7 +6,7 @@ import { TOrders } from "./order.interface";
 // NOTE: controller function to create a order
 const createOrder = async (req: Request, res: Response) => {
   try {
-    const parsedData = orderValidationSchema.safeParse(req.body.order);
+    const parsedData = orderValidationSchema.safeParse(req.body);
     // INFO: if zod validation safeParse gives me false then it will throw an error
 
     if (!parsedData.success) {

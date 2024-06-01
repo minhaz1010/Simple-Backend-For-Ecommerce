@@ -6,7 +6,7 @@ import { TProduct } from "./product.interface";
 // HACK: product controller to create product
 const createProduct = async (req: Request, res: Response) => {
   try {
-    const data = req.body.product;
+    const data = req.body;
     const parsedData = productValidationSchema.safeParse(data);
     // INFO: if zod validation safeParse gives me false then i will throw an error
     if (!parsedData.success) {
@@ -121,7 +121,6 @@ const updateProduct = async (req: Request, res: Response) => {
 
     // INFO: if any data is given then checking validation by using zod and used partial
     const parsedData = productValidationSchema.partial().safeParse(data);
-  console.log(parsedData);
     // INFO: if zod validation parsedData.success is false then it will throw error
     if (!parsedData.success) {
       const message = JSON.stringify(parsedData.error);

@@ -58,7 +58,7 @@ orderSchema.pre("save", async function (next) {
       },
     );
   } else {
-    // NOTE: if prdcut quantity < 0 then order will not be placed quantity will be 0 and inStock will be false
+    // NOTE: if prodcut quantity < 0 then order will not be placed quantity will be 0 and inStock will be false
     await Product.findOneAndUpdate(
       { _id: productid },
       {
