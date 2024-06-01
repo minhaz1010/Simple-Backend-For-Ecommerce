@@ -57,7 +57,7 @@ orderSchema.pre("save", function (next) {
             });
         }
         else {
-            // NOTE: if prdcut quantity < 0 then order will not be placed quantity will be 0 and inStock will be false
+            // NOTE: if prodcut quantity < 0 then order will not be placed quantity will be 0 and inStock will be false
             yield product_model_1.Product.findOneAndUpdate({ _id: productid }, {
                 "inventory.quantity": 0,
                 "inventory.inStock": false,

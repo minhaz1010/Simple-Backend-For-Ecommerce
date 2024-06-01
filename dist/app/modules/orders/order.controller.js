@@ -15,7 +15,7 @@ const order_services_1 = require("./order.services");
 // NOTE: controller function to create a order
 const createOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const parsedData = order_validation_1.orderValidationSchema.safeParse(req.body.order);
+        const parsedData = order_validation_1.orderValidationSchema.safeParse(req.body);
         // INFO: if zod validation safeParse gives me false then it will throw an error
         if (!parsedData.success) {
             const message = JSON.stringify(parsedData.error);
